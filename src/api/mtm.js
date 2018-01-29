@@ -152,23 +152,35 @@ export default class MusicAPI {
     * Get related media of a song given an id.
     */
     static getSongMedia = (id) => {
-        let requestUrl = BASE_URL + "/songs/" + id + "/media"
+        let BILLBOARD_URL = "http://localhost:9006/billboard/music/song/" + id;
         
-        return axios.get(requestUrl)
+        return axios.get(BILLBOARD_URL)
         .then(function (res) {
-            let result = res.data.data;
-            let media = [];
-            
-            result.forEach((mediaObj) => {
-                media.push(new MediaItem(mediaObj.url, mediaObj.caption,
-                    mediaObj.thumbnail));
-                });
+            let billboard_result = res.data.song;
+            let artist = billboard_result.display_artist;
+            let song_name = billboard_result.song_name;
+            // Using song name and display artist as search parameters
+            let MEDIA_URL = "http://localhost:9009/googleapis/customsearch/v1?q=" + escape(artist, song_name) + "&key=AIzaZyAHVa03D6aEAPH_AGR6-PJGKILKxJU-VyY&cx=001770674074172668715:am0dsqea_hey&num=4&imgType=png&searchType=image";
+
+            return axios.get(MEDIA_URL)
+            .then(function (res) {
+                let media_result = res.data.items;
+                let media = [];
+                console.log(media_result);
                 
+                media_result.forEach((mediaObj) => {
+                    media.push(new MediaItem(mediaObj.image.contextLink, mediaObj.snippet, mediaObj.image.thumbnailLink, mediaObj.title));
+                });
+
                 return media;
             })
             .catch(function (error) {
                 MusicAPI.handleError(error);
             });
-        }
+        })
+        .catch(function (error) {
+            MusicAPI.handleError(error);
+        });
     }
+}
     
