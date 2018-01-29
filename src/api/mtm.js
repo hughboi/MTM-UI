@@ -130,15 +130,15 @@ export default class MusicAPI {
     * Get historical ranks of a song given an id
     */
     static getSongRankings = (id) => {
-        let requestUrl = BASE_URL + "/songs/" + id + "/ranks";
+        let BILLBOARD_URL = "http://localhost:9006/billboard/music/song/" + id;
         
-        return axios.get(requestUrl)
+        return axios.get(BILLBOARD_URL)
         .then(function (res) {
-            let result = res.data.data;
+            let result = res.data.rankings;
             let rankings = [];
             
             result.forEach((ranking) => {
-                rankings.push(new SongRank(ranking.endDate, ranking.rank));
+                rankings.push(new SongRank(ranking.date, ranking.rank));
             });
             
             return rankings;
